@@ -1,0 +1,549 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ghost Music</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+    "Helvetica Neue", Arial, sans-serif;
+  background: #f5f5f7;
+  color: #181818;
+  padding-bottom: 150px;
+}
+
+header {
+  padding: 24px 20px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+header h1 {
+  font-size: 29px;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+header h1 span {
+  color: #fa243c;
+}
+
+.profile {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #fa243c;
+  color: white;
+  display: grid;
+  place-items: center;
+  font-weight: bold;
+}
+
+.section {
+  padding: 18px 20px;
+}
+
+.section-title {
+  font-size: 23px;
+  font-weight: 800;
+  margin-bottom: 16px;
+  letter-spacing: -.5px;
+}
+
+.search {
+  width: 100%;
+  padding: 13px 16px;
+  border: none;
+  outline: none;
+  background: #e8e8ed;
+  border-radius: 12px;
+  font-size: 15px;
+  margin-top: 10px;
+}
+
+.featured {
+  height: 210px;
+  border-radius: 20px;
+  padding: 22px;
+  color: white;
+  background: linear-gradient(135deg, #fa243c, #9d102c 65%, #360b19);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  position: relative;
+  overflow: hidden;
+}
+
+.featured::before {
+  content: "♫";
+  position: absolute;
+  font-size: 180px;
+  right: 12px;
+  top: -28px;
+  opacity: .14;
+}
+
+.featured small {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  opacity: .85;
+}
+
+.featured h2 {
+  font-size: 30px;
+  margin: 7px 0;
+}
+
+.featured p {
+  font-size: 14px;
+  opacity: .9;
+}
+
+.track-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.track {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 9px 0;
+  cursor: pointer;
+  border-bottom: 1px solid #e5e5e9;
+}
+
+.cover {
+  width: 53px;
+  height: 53px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #fa243c, #35102c);
+  display: grid;
+  place-items: center;
+  color: white;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.track-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.track-info h3 {
+  font-size: 15px;
+  font-weight: 650;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.track-info p {
+  font-size: 13px;
+  color: #888;
+  margin-top: 4px;
+}
+
+.more {
+  color: #888;
+  font-size: 20px;
+  padding: 8px;
+}
+
+.now-playing {
+  position: fixed;
+  bottom: 65px;
+  left: 10px;
+  right: 10px;
+  background: rgba(255,255,255,.97);
+  border: 1px solid #e7e7e7;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px #00000014;
+  padding: 10px 12px 8px;
+  z-index: 5;
+}
+
+.player-top {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.player-cover {
+  width: 43px;
+  height: 43px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #fa243c, #35102c);
+  display: grid;
+  place-items: center;
+  color: white;
+  font-size: 21px;
+}
+
+.player-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.player-info h3 {
+  font-size: 14px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.player-info p {
+  font-size: 12px;
+  color: #888;
+  margin-top: 3px;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.controls button {
+  border: none;
+  background: none;
+  font-size: 23px;
+  cursor: pointer;
+  color: #171717;
+}
+
+.controls .play {
+  font-size: 28px;
+}
+
+.progress {
+  width: 100%;
+  height: 3px;
+  background: #ddd;
+  margin-top: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.progress-fill {
+  width: 0%;
+  height: 100%;
+  background: #fa243c;
+}
+
+.time-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #888;
+  margin-top: 4px;
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 65px;
+  background: rgba(255,255,255,.97);
+  border-top: 1px solid #e8e8e8;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 6;
+}
+
+.nav-item {
+  border: none;
+  background: none;
+  color: #999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+}
+
+.nav-item span {
+  font-size: 21px;
+}
+
+.nav-item.active {
+  color: #fa243c;
+}
+
+.empty {
+  color: #888;
+  text-align: center;
+  padding: 25px 0;
+  font-size: 14px;
+}
+
+@media (min-width: 700px) {
+  body {
+    max-width: 600px;
+    margin: auto;
+    border-left: 1px solid #eee;
+    border-right: 1px solid #eee;
+    min-height: 100vh;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Ghost <span>Music.</span></h1>
+  <div class="profile">G</div>
+</header>
+
+<div class="section">
+  <input
+    class="search"
+    id="search"
+    type="search"
+    placeholder="Search songs, artists..."
+  >
+</div>
+
+<div class="section">
+  <div class="featured">
+    <small>GHOST MUSIC EXCLUSIVE</small>
+    <h2>Music for you.</h2>
+    <p>Your favorite sounds, all in one place.</p>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title">Recently Added</h2>
+  <div class="track-list" id="trackList"></div>
+</div>
+
+<div class="section">
+  <h2 class="section-title">Made for You</h2>
+  <p style="color:#888;font-size:14px;">
+    Your personal music collection.
+  </p>
+</div>
+
+<div class="now-playing">
+  <div class="player-top">
+    <div class="player-cover">♫</div>
+
+    <div class="player-info">
+      <h3 id="currentTitle">Choose a song</h3>
+      <p id="currentArtist">Ghost Music</p>
+    </div>
+
+    <div class="controls">
+      <button onclick="previousTrack()" aria-label="Previous">⏮</button>
+      <button class="play" id="playButton"
+        onclick="togglePlay()" aria-label="Play">▶</button>
+      <button onclick="nextTrack()" aria-label="Next">⏭</button>
+    </div>
+  </div>
+
+  <div class="progress" id="progress">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+
+  <div class="time-row">
+    <span id="currentTime">0:00</span>
+    <span id="duration">0:00</span>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-item active">
+    <span>⌂</span>Listen Now
+  </button>
+  <button class="nav-item">
+    <span>▤</span>Browse
+  </button>
+  <button class="nav-item">
+    <span>♫</span>Library
+  </button>
+  <button class="nav-item">
+    <span>⌕</span>Search
+  </button>
+</nav>
+
+<audio id="audio"></audio>
+
+<script>
+const tg = window.Telegram?.WebApp;
+tg?.ready();
+tg?.expand();
+
+const tracks = [
+  {
+    name: "Song One",
+    artist: "Artist One",
+    url: "YOUR_MP3_URL_1"
+  },
+  {
+    name: "Song Two",
+    artist: "Artist Two",
+    url: "YOUR_MP3_URL_2"
+  },
+  {
+    name: "Song Three",
+    artist: "Artist Three",
+    url: "YOUR_MP3_URL_3"
+  }
+];
+
+const audio = document.getElementById("audio");
+const trackList = document.getElementById("trackList");
+const playButton = document.getElementById("playButton");
+
+let currentIndex = -1;
+
+function renderTracks(filter = "") {
+  trackList.innerHTML = "";
+
+  const filtered = tracks
+    .map((track, index) => ({ ...track, index }))
+    .filter(track =>
+      (track.name + " " + track.artist)
+        .toLowerCase()
+        .includes(filter.toLowerCase())
+    );
+
+  if (!filtered.length) {
+    trackList.innerHTML =
+      '<div class="empty">No songs found.</div>';
+    return;
+  }
+
+  filtered.forEach(track => {
+    const item = document.createElement("div");
+    item.className = "track";
+
+    const cover = document.createElement("div");
+    cover.className = "cover";
+    cover.textContent = "♫";
+
+    const info = document.createElement("div");
+    info.className = "track-info";
+
+    const name = document.createElement("h3");
+    name.textContent = track.name;
+
+    const artist = document.createElement("p");
+    artist.textContent = track.artist;
+
+    const more = document.createElement("div");
+    more.className = "more";
+    more.textContent = "•••";
+
+    info.append(name, artist);
+    item.append(cover, info, more);
+
+    item.addEventListener("click", () => playTrack(track.index));
+    trackList.appendChild(item);
+  });
+}
+
+function playTrack(index) {
+  if (!tracks[index]) return;
+
+  currentIndex = index;
+  const track = tracks[index];
+
+  audio.src = track.url;
+  document.getElementById("currentTitle").textContent = track.name;
+  document.getElementById("currentArtist").textContent = track.artist;
+
+  audio.play().then(() => {
+    playButton.textContent = "Ⅱ";
+  }).catch(() => {
+    playButton.textContent = "▶";
+  });
+}
+
+function togglePlay() {
+  if (currentIndex === -1) {
+    if (tracks.length) playTrack(0);
+    return;
+  }
+
+  if (audio.paused) {
+    audio.play().then(() => {
+      playButton.textContent = "Ⅱ";
+    }).catch(() => {
+      playButton.textContent = "▶";
+    });
+  } else {
+    audio.pause();
+    playButton.textContent = "▶";
+  }
+}
+
+function nextTrack() {
+  if (!tracks.length) return;
+  playTrack((currentIndex + 1) % tracks.length);
+}
+
+function previousTrack() {
+  if (!tracks.length) return;
+  if (audio.currentTime > 3) {
+    audio.currentTime = 0;
+  } else {
+    playTrack((currentIndex - 1 + tracks.length) % tracks.length);
+  }
+}
+
+function formatTime(seconds) {
+  if (!Number.isFinite(seconds)) return "0:00";
+  const minutes = Math.floor(seconds / 60);
+  const remaining = Math.floor(seconds % 60);
+  return `${minutes}:${String(remaining).padStart(2, "0")}`;
+}
+
+audio.addEventListener("timeupdate", () => {
+  const percent = audio.duration
+    ? (audio.currentTime / audio.duration) * 100
+    : 0;
+
+  document.getElementById("progressFill").style.width = percent + "%";
+  document.getElementById("currentTime").textContent =
+    formatTime(audio.currentTime);
+  document.getElementById("duration").textContent =
+    formatTime(audio.duration);
+});
+
+document.getElementById("progress").addEventListener("click", event => {
+  if (!audio.duration) return;
+
+  const rect = event.currentTarget.getBoundingClientRect();
+  const percent = (event.clientX - rect.left) / rect.width;
+  audio.currentTime = percent * audio.duration;
+});
+
+audio.addEventListener("ended", nextTrack);
+
+document.getElementById("search").addEventListener("input", event => {
+  renderTracks(event.target.value);
+});
+
+renderTracks();
+</script>
+
+</body>
+</html>
